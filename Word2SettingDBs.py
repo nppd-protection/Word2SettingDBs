@@ -453,6 +453,15 @@ try:
             logger.warning('SEL-3XX Port setting table not identified')
 
     grp = 'FRONT PANEL'
+    # Fill in unset display point settings with blanks so that any that are already
+    # set in AcSELerator or Aspen database will be cleared. Settings up through 96
+    # are checked for and added if not present.
+    if rly_family == '4XX' and grp in settings:
+        setList = set([setName for setName, setVal in settings[grp]])
+        for n in range(1,97):
+            if 'DP_ELE%d'%n not in setList:
+                settings[grp].append(('DP_ELE%d'%n, ''))
+                
     # SEL-487B display point settings have to be handled before Aspen file is written
     # since for some reason the template was set up according to internal structure
     # of display points (except not handling analogs).
@@ -469,6 +478,9 @@ try:
                 setList = [s + n for s in DPAnaSetList]
             else:
                 setList = [s + n for s in DPSetList]
+            # If not enough settings are provided, extend with blanks
+            if len(valList) < len(setList):
+                valList.extend(['']*(len(setList) - len(valList)))
 
             logger.debug(valList)
             settings[grp].extend(zip(setList, valList))
@@ -606,6 +618,9 @@ try:
                 setList = [s + n for s in DPAnaSetList]
             else:
                 setList = [s + n for s in DPSetList]
+            # If not enough settings are provided, extend with blanks
+            if len(valList) < len(setList):
+                valList.extend(['']*(len(setList) - len(valList)))
 
             logger.debug(valList)
             settings[grp].extend(zip(setList, valList))
