@@ -359,7 +359,7 @@ try:
     if rly_family == '4XX':
         # Protection Logic
         # Look for PCTxx, PSVxx, etc. settings
-        tLogic = findTable(document.tables, re.compile('(PCT[0-9]{2}PU)|(PSV[0-9]{2})|PMV[0-9]{2}\s*:=').match)
+        tLogic = findTable(document.tables, re.compile('(PCT[0-9]{2}PU)|(PSV[0-9]{2})|(PMV[0-9]{2})|(PLT[0-9]{2}S)\s*:=').match)
         if tLogic:
             if len(tLogic.columns) == 2:
                 grp = 'PROTECTION LOGIC'
