@@ -562,7 +562,8 @@ try:
                        'setting': setting, 
                        'value': value,
                        'range': setrange,
-                       'comment': comment })
+                       'comment': comment,
+                       'modified': False })
                 logger.debug(aspenSettings[grp][-1])
 
     # Loop through settings extracted from Word file and try to find a match in the Aspen settings
@@ -577,6 +578,7 @@ try:
                 if aspenSetting['setting'].upper() == setting.upper():
                     logger.debug('setting:' + setting + 'old value:' + aspenSetting['value'] + 'new value:' + value)
                     aspenSetting['value'] = value
+                    aspenSetting['modified'] = True
                     # For SEL-351 relays, some of the voltage settings appear twice due to PTCON = DELTA or WYE
                     # global setting.  The settings that appear twice will be set everywhere they appear so that
                     # the needed setting is set.
@@ -588,8 +590,10 @@ try:
     aspen_file_lines = list(output_head)
     for grp, settinglist in aspenSettings.items():
         for setting in settinglist:
-            aspen_file_lines.append("%s,'%s'='%s','%s','%s','%s','','','','',''" %
-                                    (setting['row'], grp, setting['setting'], setting['range'], setting['value'], setting['comment']))
+            # Only output modified settings
+            if setting['modified']:
+                aspen_file_lines.append("%s,'%s'='%s','%s','%s','%s','','','','',''" %
+                                        (setting['row'], grp, setting['setting'], setting['range'], setting['value'], setting['comment']))
     aspen_file_text = '\n'.join(aspen_file_lines)
     logger.debug(aspen_file_text)
 
