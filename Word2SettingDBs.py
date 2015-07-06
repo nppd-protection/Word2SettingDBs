@@ -78,7 +78,7 @@ logging_config = {
         'file': {'format':
               '%(asctime)s ' + os.environ['USERNAME'] + ' %(levelname)-8s %(message)s'},
         'console': {'format':
-              '%(message)s'}
+              '%(levelname)-8s %(message)s'}
         },
         
     'handlers': {
@@ -274,7 +274,7 @@ try:
                  "PORT 1": "0",
                  "PORT 2": "0",
                  "PORT 3": "0",
-                 "PORT 4": "P3",
+                 "PORT 4": "0",
                  "PORT F": "0"}
 
     reSetting = re.compile('([^=]+)\s*=\s*(.*)')
@@ -545,7 +545,7 @@ try:
     # Remaining lines are settings.  These will be parsed, modified, then re-output for
     # file output
     aspenSettings = {}
-    reParseAspenSetting = re.compile("(?P<row>[0-9.]+),'(?P<grp>.+)'='(?P<setting>.*)','(?P<range>.*)','(?P<value>.*)','(?P<comment>.*)','.*','.*','.*','.*','.*'")
+    reParseAspenSetting = re.compile("(?P<row>[0-9.]+),'(?P<grp>.+)'='(?P<setting>.*?)','(?P<range>.*?)','(?P<value>.*?)','(?P<comment>.*?)','.*','.*','.*','.*','.*'")
     for line in iter_input:
         parseAspenSetting = reParseAspenSetting.match(line)
         if parseAspenSetting:
@@ -569,12 +569,16 @@ try:
     # Loop through settings extracted from Word file and try to find a match in the Aspen settings
     logger.info('Matching settings from Word document to Aspen template....')
     for grp, settinglist in settings.items():
+        logger.debug('Processing group '+grp)
         # For now skip 3XX port settings since there isn't an easy way to match up the ports correctly
-        if rly_family == '3XX' and grp in ('PORT 1', 'PORT 2', 'PORT 3', 'PORT F'):
+        if rly_family == '3XX' and grp in ('PORT 1', 'PORT 2', 'PORT 3', 'PORT F', 'PORT 4'):
             continue
         for setting, value in settinglist:
+            logger.debug('Looking for setting '+setting)
             for aspenSetting in aspenSettings[aspen_names[grp]]:
                 # Aspen DB exports setting names all caps, so comparison has to be case insensitive.
+                if aspenSetting['setting'].upper().strip() == setting.upper() and aspenSetting['setting'].upper() != setting.upper():
+                    logger.warning('Database setting name with extra space: "'+aspenSetting['setting']+'"')
                 if aspenSetting['setting'].upper() == setting.upper():
                     logger.debug('setting:' + setting + 'old value:' + aspenSetting['value'] + 'new value:' + value)
                     aspenSetting['value'] = value
