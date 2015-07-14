@@ -591,7 +591,10 @@ try:
 
     logger.info('Saving settings to file for import into Aspen....')
     # Loop through final Aspen settings and build string to output to file
-    aspen_file_lines = list(output_head)
+    # Only the first three lines and last line of header material is kept, otherwise request
+    # data like status, request date, etc. will be overwritten with what is in the template.
+    aspen_file_lines = output_head[:3]
+    aspen_file_lines.append(output_head[-1])
     for grp, settinglist in aspenSettings.items():
         for setting in settinglist:
             # Only output modified settings
