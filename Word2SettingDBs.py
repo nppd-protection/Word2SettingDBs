@@ -45,11 +45,13 @@ document, then writes out a new Aspen Database text file for subsequent import i
 Aspen Database.  As of 7/14/2014, Aspen Database has a number of bugs that can
 affect the importing of settings.  Sometimes the Aspen Database program will report
 an error message about not being able to connect to the database.  This error can
-be resolevd by closing Aspen Database and then re-opening it.  The Aspen Database
+be resolved by closing Aspen Database and then re-opening it.  The Aspen Database
 setting sheet comparison feature compares only based on common group and setting
 names and does not handle settings with the same group and name well.  The comparison
-may show settings as changed or different between two setting sheets even through
-they are in fact the same.
+may show settings as changed or different between two setting sheets even though
+they are in fact the same. An updated build of Aspen Database resolves these
+issues but as of 1/23/2016 has not been officially released. See Paul if you
+would like to run the development release.
 
 NOTE:  Due to issues with duplicate setting names, port settings for SEL-3Xx relays
 are currently NOT exported to Aspen database.
