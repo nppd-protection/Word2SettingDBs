@@ -366,7 +366,7 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 setList = [ 'PROTSEL%d'%n for n in range(1, 251) ]
-                valList = [ c.paragraphs[0].text for c in tLogic.columns[1].cells ]
+                valList = [ ''.join([''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells ]
                 valList.extend(['']*(250 - len(valList)))
                 settings[grp].extend(zip(setList, valList))
             else:
@@ -383,7 +383,7 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 setList = [ 'AUTO_%d'%n for n in range(1,101) ]
-                valList = [ c.paragraphs[0].text for c in tLogic.columns[1].cells ]
+                valList = [ ''.join([''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells ]
                 valList.extend(['']*(100 - len(valList)))
                 settings[grp].extend(zip(setList, valList))
             else:
