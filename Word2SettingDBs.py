@@ -328,7 +328,7 @@ try:
                 logger.debug("Group:" + t)
                 
         if p.style in ('SettingLine', 'SettingLineStandard'):
-            t = ''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip()
+            t = ''.join([r.text for r in filter(lambda r: r.bold and not r.strike, p.runs)]).strip()
             #s = stripall(t.split('='))
             sm = reSetting.match(t)
             #if len(s) == 2:
