@@ -654,17 +654,19 @@ try:
     grp = 'REPORT'
     if rly_family == '4XX' and grp in settings:
         SPAQSetting, settings[grp] = partition(lambda s: re.match('SPAQ', s[0]), settings[grp])
-        valList = stripall(SPAQSetting[0][1].split(','))
-        setList = [ 'SPAQ%d'%n for n in range(1,len(valList)+1) ]
-        settings[grp].extend(zip(setList, valList))
+        if len(SPAQSetting) > 0:
+            valList = stripall(SPAQSetting[0][1].split(','))
+            setList = [ 'SPAQ%d'%n for n in range(1,len(valList)+1) ]
+            settings[grp].extend(zip(setList, valList))
 
     #ERAQ
     grp = 'REPORT'
     if rly_family =='4XX' and grp in settings:
         ERAQSetting, settings[grp] = partition(lambda s: re.match('ERAQ', s[0]), settings[grp])
-        valList = stripall(ERAQSetting[0][1].split(','))
-        setList = [ 'ERAQ%d'%n for n in range(1,len(valList)+1) ]
-        settings[grp].extend(zip(setList, valList))
+        if len(ERAQSetting) > 0:
+            valList = stripall(ERAQSetting[0][1].split(','))
+            setList = [ 'ERAQ%d'%n for n in range(1,len(valList)+1) ]
+            settings[grp].extend(zip(setList, valList))
         
     # SEL-487B Zone Assignments
     #
