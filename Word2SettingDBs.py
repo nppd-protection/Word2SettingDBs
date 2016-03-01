@@ -159,6 +159,9 @@ try:
                 falses.append(item)
         return trues, falses
 
+    def setting_run(r):
+        return r.bold and not r.strike
+    
     def invert_dict(d):
         return dict(map(lambda x: (x[1], x[0]), d.items()))
 
@@ -328,7 +331,7 @@ try:
                 logger.debug("Group:" + t)
                 
         if p.style in ('SettingLine', 'SettingLineStandard'):
-            t = ''.join([r.text for r in filter(lambda r: r.bold and not r.strike, p.runs)]).strip()
+            t = ''.join([r.text for r in filter(setting_run, p.runs)]).strip()
             #s = stripall(t.split('='))
             sm = reSetting.match(t)
             #if len(s) == 2:
@@ -368,7 +371,7 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 setList = [ 'PROTSEL%d'%n for n in range(1, 251) ]
-                valList = [ ''.join([''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells ]
+                valList = filter(lambda s: len(s) > 0, [ ''.join([''.join([r.text for r in filter(setting_run, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells ])
                 valList.extend(['']*(250 - len(valList)))
                 settings[grp].extend(zip(setList, valList))
             else:
@@ -385,7 +388,7 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 setList = [ 'AUTO_%d'%n for n in range(1,101) ]
-                valList = [ ''.join([''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells ]
+                valList = filter(lambda s: len(s) > 0, [ ''.join([''.join([r.text for r in filter(setting_run, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells ])
                 valList.extend(['']*(100 - len(valList)))
                 settings[grp].extend(zip(setList, valList))
             else:
@@ -402,7 +405,7 @@ try:
             for r in tZoneAssignments.rows:
                 for c in r.cells:
                     for p in c.paragraphs:
-                        t = ''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip()
+                        t = ''.join([r.text for r in filter(setting_run, p.runs)]).strip()
                         s = stripall(t.split('='))
                         if len(s) == 2:
                             if grp not in settings:
@@ -422,7 +425,7 @@ try:
             for r in tLogic.rows:
                 for c in r.cells:
                     for p in c.paragraphs:
-                        t = ''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip()
+                        t = ''.join([r.text for r in filter(setting_run, p.runs)]).strip()
                         s = stripall(t.split('='))
                         if len(s) == 2:
                             if grp not in settings:
@@ -444,7 +447,7 @@ try:
                     grp = portX(portMatch.group(0))
                     for c in col.cells:
                         for p in c.paragraphs:
-                            t = ''.join([r.text for r in filter(lambda r: r.bold, p.runs)]).strip()
+                            t = ''.join([r.text for r in filter(setting_run, p.runs)]).strip()
                             s = stripall(t.split('='))
                             if len(s) == 2:
                                 if grp not in settings:
