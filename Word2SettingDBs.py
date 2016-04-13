@@ -116,6 +116,7 @@ try:
     easy_install python-docx
 
     Otherwise download the tar.gz and run setup.py install.
+    Currently working with 0.8.5. Version 0.7.2 NOT working.
     '''
     from docx import Document
 
@@ -160,7 +161,7 @@ try:
         return trues, falses
 
     def setting_run(r):
-        return r.bold and not r.strike
+        return r.font.bold and not r.font.strike
     
     def invert_dict(d):
         return dict(map(lambda x: (x[1], x[0]), d.items()))
@@ -307,22 +308,23 @@ try:
                 break
 
     for p in document.paragraphs:
-        if p.style == 'Heading1':        
+        logger.debug('Paragraph style: %s' % p.style.name)
+        if p.style.name == 'Heading 1':        
             for groupText, reGroup in reGroups:
                 if reGroup.match(p.text):
                     if callable(groupText):
                         t = groupText(p.text)
                     else:
                         t = groupText
-                    logger.debug(p.style + ': "'+p.text+'"')
+                    logger.debug(p.style.name + ': "'+p.text+'"')
                     logger.debug("Group:" + t)
                     grp = t
                     break
                     
-        if p.style == "Heading2":
+        if p.style.name == 'Heading 2':
             groupText, reGroup = reGroups[-1]
             if reGroup.match(p.text):
-                logger.debug(p.style + ': "'+p.text+'"')
+                logger.debug(p.style.name + ': "'+p.text+'"')
                 if callable(groupText):
                     t = groupText(p.text)
                 else:
@@ -330,7 +332,7 @@ try:
                 grp = t
                 logger.debug("Group:" + t)
                 
-        if p.style in ('SettingLine', 'SettingLineStandard'):
+        if p.style.name in ('SettingLine', 'SettingLineStandard'):
             t = ''.join([r.text for r in filter(setting_run, p.runs)]).strip()
             #s = stripall(t.split('='))
             sm = reSetting.match(t)
@@ -340,7 +342,7 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 settings[grp].append((s[0],s[1]))
-                logger.debug(p.style + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
+                logger.debug(p.style.name + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
                 if reSpecial.search(s[0]):
                     logger.debug('Special character in ' + s[0] + ':' + ' '.join(map(lambda c: hex(ord(c)), reSpecial.search(s[0]).group(0))))
                 
@@ -411,7 +413,7 @@ try:
                             if grp not in settings:
                                 settings[grp] = []
                             settings[grp].append((s[0],s[1]))
-                            logger.debug(p.style + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
+                            logger.debug(p.style.name + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
         else:
             logger.warning('SEL-487B zone assignment table not identified')
             
@@ -431,7 +433,7 @@ try:
                             if grp not in settings:
                                 settings[grp] = []
                             settings[grp].append((s[0],s[1]))
-                            logger.debug(p.style + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
+                            logger.debug(p.style.name + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
         else:
             logger.warning('SEL-3XX display point table not identified')
             
@@ -453,7 +455,7 @@ try:
                                 if grp not in settings:
                                     settings[grp] = []
                                 settings[grp].append((s[0],s[1]))
-                                logger.debug(p.style + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
+                                logger.debug(p.style.name + ': ('+grp+') "'+s[0]+'", "'+s[1]+'"')
         else:
             logger.warning('SEL-3XX Port setting table not identified')
 
