@@ -56,11 +56,8 @@ would like to run the development release.
 NOTE:  Due to issues with duplicate setting names, port settings for SEL-3Xx relays
 are currently NOT exported to Aspen database.
 
-Progress information and errors are logged to
-T:\T&DElectronicFiling\ProtCntrl\ProtectionMaster\Software\Word2SettingDBs\Word2SettingDBs.log
-If problems are encountered, reference the log and seek assistance from Paul Brown
-if you are not able to resolve the issue.  Note that the T:\ drive must be mapped
-to \\cgownt08\TEAM\ as per current T&D Engineering standard workstation configuration.
+Progress information and errors are logged to the same directory as the program
+is run from.
 
 '''
 
@@ -74,6 +71,12 @@ import re, sys, os.path, os, codecs, msvcrt
 import logging
 from logging.config import dictConfig
 
+# By default, log to the same directory the program is run from    
+if os.path.exists(os.path.dirname(sys.argv[0])):
+    logfile = os.path.join(os.path.dirname(sys.argv[0]), 'Word2SettingDBs.log')
+else:
+    logfile = 'Word2SettingDBs.log'
+
 logging_config = {
     'version': 1,
     'formatters': {
@@ -85,7 +88,7 @@ logging_config = {
         
     'handlers': {
         'file': {'class': 'logging.FileHandler',
-            'filename': 'T:\T&DElectronicFiling\ProtCntrl\ProtectionMaster\Software\Word2SettingDBs\Word2SettingDBs.log',
+            'filename': logfile,
             'formatter': 'file',
             'level': 'INFO'},
         'console': {'class': 'logging.StreamHandler',
@@ -103,6 +106,8 @@ dictConfig(logging_config)
 logger = logging.getLogger('root')
 
 try:
+    logger.info('Running %s.' % sys.argv[0])
+    logger.info('Logging to file %s.' % os.path.abspath(logfile))
 
     '''
     The docx package documentation can be found at

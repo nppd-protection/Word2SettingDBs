@@ -1,3 +1,4 @@
 # Ignore pyinstaller build files
 dist/**
 build/**
+Word2SettingDBs.log
