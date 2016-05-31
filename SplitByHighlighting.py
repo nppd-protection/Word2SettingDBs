@@ -27,7 +27,7 @@ from logging.config import dictConfig
 
 # By default, log to the same directory the program is run from    
 if os.path.exists(os.path.dirname(sys.argv[0])):
-    logfile = os.path.join(os.path.dirname(sys.argv[0]), 'Word2SettingDBs.log')
+    logfile = os.path.join(os.path.dirname(sys.argv[0]), 'SplitByHighlighting.log')
 else:
     logfile = 'SplitByHighlighting.log'
 
@@ -47,7 +47,7 @@ logging_config = {
             'level': 'INFO'},
         'console': {'class': 'logging.StreamHandler',
             'formatter': 'console',
-            'level': 'DEBUG'}
+            'level': 'INFO'}
         },
     'loggers': {
         'root' : {'handlers': ['file', 'console'],
@@ -106,11 +106,11 @@ try:
     if len(sys.argv) < 2:
         logger.error("Not enough input parameters.  Please include one filename when calling this program.")
         logger.error(__doc__)
-        sys.exit(1)
+        raise SystemExit
     elif len(sys.argv) > 2:
         logger.error("Too many input parameters.  Please include one filename when calling this program.")
         logger.error(__doc__)
-        sys.exit(1)
+        raise SystemExit
 
     documentParam = sys.argv[1]
 
@@ -161,9 +161,9 @@ except (SystemExit, KeyboardInterrupt):
     raise
 except Exception, e:
     logger.error('Program error', exc_info=True)
-    
-# Code copied from http://stackoverflow.com/questions/11876618/python-press-any-key-to-exit    
-# This uses a Windows-specific library (msvrt).
-logger.info('DONE.')
-#print('Press any key to exit...')
-#junk = msvcrt.getch() # Assign to a variable just to suppress output. Blocks until key press.
+finally:    
+    # Code copied from http://stackoverflow.com/questions/11876618/python-press-any-key-to-exit    
+    # This uses a Windows-specific library (msvrt).
+    logger.info('DONE.')
+    print('Press any key to exit...')
+    junk = msvcrt.getch() # Assign to a variable just to suppress output. Blocks until key press.

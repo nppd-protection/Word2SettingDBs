@@ -131,11 +131,11 @@ try:
     if len(sys.argv) < 3:
         logger.error("Not enough input parameters.  Please include two filenames when calling this program.")
         logger.error(__doc__)
-        sys.exit(1)
+        raise SystemExit
     elif len(sys.argv) > 3:
         logger.error("Too many input parameters.  Please include two filename when calling this program.")
         logger.error(__doc__)
-        sys.exit(1)
+        raise SystemExit
 
     if re.match('.*\.docx$', sys.argv[1], flags=re.I):
         documentParam = sys.argv[1]
@@ -530,7 +530,7 @@ try:
     if not relayType:
         logger.error('Relay type not detected in AspenDB export file.  Verify correct export file was sent to the program.')
         logger.error(__doc__)
-        sys.exit(1)
+        raise SystemExit
 
     # Choose relay type groups
     if reRelayModel.search(relayType):
@@ -544,7 +544,7 @@ try:
     else:
         logger.error("Relay type not detected in AspenDB export file.  Verify correct export file was sent to the program.")
         logger.error(__doc__)
-        sys.exit(1)
+        raise SystemExit
 
     inv_aspen_names = invert_dict(aspen_names)
 
@@ -762,9 +762,9 @@ except (SystemExit, KeyboardInterrupt):
     raise
 except Exception, e:
     logger.error('Program error', exc_info=True)
-    
-# Code copied from http://stackoverflow.com/questions/11876618/python-press-any-key-to-exit    
-# This uses a Windows-specific library (msvrt).
-logger.info('DONE.')
-print('Press any key to exit...')
-junk = msvcrt.getch() # Assign to a variable just to suppress output. Blocks until key press.
+finally:    
+    # Code copied from http://stackoverflow.com/questions/11876618/python-press-any-key-to-exit    
+    # This uses a Windows-specific library (msvrt).
+    logger.info('DONE.')
+    print('Press any key to exit...')
+    junk = msvcrt.getch() # Assign to a variable just to suppress output. Blocks until key press.
