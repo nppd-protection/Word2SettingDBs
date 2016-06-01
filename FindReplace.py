@@ -2,13 +2,11 @@
 
 '''
 USAGE:
-SplitByHighlighting.py <Document.docx>
+FindReplace.py <Document.docx> find_text replace_text
 <Document.docx>:  MS Word docx document
 
 ABOUT:
-The program will take a MS Word document and split it into multiple documents
-based on highlight colors. Each resulting document will include all
-unhighlighted text as well as text highlighted in ONE color.
+Find some text and replace with other text.
 
 Progress information and errors are logged to the same directory as the program
 is run from.
@@ -27,7 +25,7 @@ from logging.config import dictConfig
 
 # By default, log to the same directory the program is run from    
 if os.path.exists(os.path.dirname(sys.argv[0])):
-    logfile = os.path.join(os.path.dirname(sys.argv[0]), 'SplitByHighlighting.log')
+    logfile = os.path.join(os.path.dirname(sys.argv[0]), 'FindReplace.log')
 else:
     logfile = 'SplitByHighlighting.log'
 
@@ -47,7 +45,7 @@ logging_config = {
             'level': 'INFO'},
         'console': {'class': 'logging.StreamHandler',
             'formatter': 'console',
-            'level': 'INFO'}
+            'level': 'DEBUG'}
         },
     'loggers': {
         'root' : {'handlers': ['file', 'console'],
@@ -58,7 +56,7 @@ logging_config = {
 dictConfig(logging_config)
 
 logger = logging.getLogger('root')
-    
+
 try:
     logger.info('Running %s.' % sys.argv[0])
     logger.info('Logging to file %s.' % os.path.abspath(logfile))
@@ -103,34 +101,20 @@ try:
     logger.info('Base filename:  ' + doc_base)
     #logger.info('Output files: ' + sel_save_file + ', ' + aspen_save_file)
 
-
-    document = Document(documentParam)
-
-    run_dict = dict()
-
-    for p, r in iter_all_runs(document):
-        if r.font.highlight_color != None:
-            logger.debug(r.text + ' ===> ' + str(r.font.highlight_color))
-            try:
-                run_dict[r.font.highlight_color].append(r)
-            except KeyError:
-                run_dict[r.font.highlight_color] = [r]
     
-    logger.debug('Colors used and number of runs')
-    for k, v in run_dict.items():
-        logger.debug(str(k) + ': ' + str(len(v)))
-        
-    # For each color, make a temp copy of the document, clear text in runs
-    # of different highlighting colors and write the output to a new file.
-    all_colors = set(run_dict.keys())
-    for keep_color in all_colors:
-        save_file = doc_base + ' (' + str(keep_color).split()[0] + ').docx'
-        shutil.copyfile(documentParam, save_file)
-        new_document = Document(save_file)
-        for remove_color in all_colors - set([keep_color]):
-            remove_highlighted(new_document, remove_color)
-        logger.info('Saving output file: %s' % save_file)
-        new_document.save(save_file)
+    save_file = doc_base + ' (modified).docx'
+    shutil.copyfile(documentParam, save_file)
+    document = Document(save_file)
+    
+    # Hardcoded for testing.
+    find_text = 'test'
+    replace_text = 'replaced'
+    
+    find_replace(document, find_text, replace_text)
+
+    
+    logger.info('Saving output file: %s' % save_file)
+    document.save(save_file)
 
 except (SystemExit, KeyboardInterrupt):
     raise
@@ -141,4 +125,4 @@ finally:
     # This uses a Windows-specific library (msvrt).
     logger.info('DONE.')
     print('Press any key to exit...')
-    junk = msvcrt.getch() # Assign to a variable just to suppress output. Blocks until key press.
+    #junk = msvcrt.getch() # Assign to a variable just to suppress output. Blocks until key press.

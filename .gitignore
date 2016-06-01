@@ -1,5 +1,5 @@
 # Ignore pyinstaller build files
 dist/**
 build/**
-Word2SettingDBs.log
-SplitByHighlighting.log
+*.log
+*.pyc
