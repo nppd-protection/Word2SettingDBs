@@ -28,7 +28,7 @@ def accumulate(iterable, func=operator.add):
         yield total
 
 def iter_all_runs(document, *args, **kwargs):
-    for p in iter_all_paragraphs2(document, *args, **kwargs):
+    for p in iter_all_paragraphs(document, *args, **kwargs):
         for r in p.runs:
             yield p, r
 
@@ -71,6 +71,11 @@ def iter_all_paragraphs_old(document):
                         
 def delete_paragraph(paragraph):
     p = paragraph._element
+    p.clear_content() # At least remove text
+    # Can't remove last paragraph in table cell.
+    if isinstance(p.getparent(), docx.oxml.CT_Tc):
+        if len(p.getparent().p_lst) < 2:
+            return
     p.getparent().remove(p)
     p._p = p._element = None
     
@@ -79,13 +84,24 @@ def delete_run(run):
     r.getparent().remove(r)
     r._p = r._element = None
     
+def delete_row(row):
+    tbl = row.getparent()
+    tbl.remove(row)
+    # If table no longer has any rows, remove the table.
+    if len(tbl.tr_lst) == 0:
+        delete_table(tbl)
+        
+def delete_table(tbl):
+    p = tbl.getparent()
+    p.remove(tbl)
+    
 def merge_runs(run_list):
     for r in run_list[1:]:
         run_list[0].text += r.text
         delete_run(r)
         
-def find_replace(document, find_text, replace_text):    
-    for p in iter_all_paragraphs(document):
+def find_replace(document, find_text, replace_text, *args, **kwargs):    
+    for p in iter_all_paragraphs(document, *args, **kwargs):
         if find_text in p.text:
             # Text is in paragraph. Now identify which runs it is in. Keep in
             # mind the text could occur more than once and occur across run
@@ -130,13 +146,35 @@ def find_replace(document, find_text, replace_text):
                 newtext = re.sub(find_text, replace_text, rtext)
                 r.text = newtext
 
-def remove_highlighted(document, remove_color, *args, **kwargs):
-    for p, r in iter_all_runs(document, *args, **kwargs):
-        if r.font.highlight_color == remove_color:
-            r.clear()
-            r_p = p
-            if len(r_p.text) == 0:
-                delete_paragraph(r_p)
+def remove_highlighted(document, remove_color, clean_logic_tables = False, *args, **kwargs):
+    for p in iter_all_paragraphs(document, *args, **kwargs):
+        for r in p.runs:
+            if r.font.highlight_color == remove_color:
+                r.clear()
+                r_p = p
+                if len(r_p.text) == 0:
+                    delete_paragraph(r_p)
+                # If table row is now rendered empty, delete the row
+                if isinstance(p._element.getparent(), docx.oxml.CT_Tc):
+                    row =p._element.getparent().getparent()
+                    row_pars = []
+                    for tc in row.tc_lst:
+                        for p2 in tc:
+                            if isinstance(p2, docx.oxml.CT_P):
+                                row_pars.append(docx.text.paragraph.Paragraph(p2, p2.getparent()))
+                    row_text = ''.join([p2.text for p2 in row_pars])
+                    if len(row_text) == 0:
+                        delete_row(row)
+                    # Special rule for Automation Logic & Protection Logic tables
+                    elif clean_logic_tables and re.match('[0-9]+\:(NOT 52AA1 *)?$', row_text) or re.match('[0-9]+\:(NOT \(52AA1 OR 52AA2\) *)?$', row_text):
+                        delete_row(row)
+                        
+        # There could be empty paragraphs with highlighting applied to paragraph
+        # I had to patch python-docx a little to get this to work.
+        if len(p.text) == 0:
+            if p.font is not None and p.font.highlight_color == remove_color:
+                if p._element.getparent() is not None:
+                    delete_paragraph(p)
                 
 # http://stackoverflow.com/questions/24965042/python-docx-insertion-point
 def get_bookmark_par_element(document, bookmark_name):
