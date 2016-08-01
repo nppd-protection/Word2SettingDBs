@@ -112,8 +112,9 @@ def merge_runs(run_list):
 
 
 def find_replace(document, find_text, replace_text, *args, **kwargs):
+    find_re = re.compile(find_text)
     for p in iter_all_paragraphs(document, *args, **kwargs):
-        if find_text in p.text:
+        if find_re.search(p.text) is not None:
             # Text is in paragraph. Now identify which runs it is in. Keep in
             # mind the text could occur more than once and occur across run
             # breaks.
@@ -123,7 +124,7 @@ def find_replace(document, find_text, replace_text, *args, **kwargs):
             run_idx = [0] + list(accumulate(run_len))
 
             # First pass to merge runs as needed.
-            for m in re.finditer(find_text, p.text):
+            for m in find_re.finditer(p.text):
                 start = m.start()
                 end = m.end()
 
@@ -142,7 +143,7 @@ def find_replace(document, find_text, replace_text, *args, **kwargs):
             run_len = [len(r.text) for r in p.runs]
             run_idx = [0] + list(accumulate(run_len))
             runs_containing = set()
-            for m in re.finditer(find_text, p.text):
+            for m in find_re.finditer(p.text):
                 start = m.start()
                 end = m.end()
 
@@ -154,7 +155,7 @@ def find_replace(document, find_text, replace_text, *args, **kwargs):
             for n in runs_containing:
                 r = p.runs[n]
                 rtext = r.text
-                newtext = re.sub(find_text, replace_text, rtext)
+                newtext = find_re.sub(replace_text, rtext)
                 r.text = newtext
 
 
