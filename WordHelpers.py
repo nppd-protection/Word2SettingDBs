@@ -48,7 +48,7 @@ def iter_all_paragraphs(document, start=None, end=None):
     '''
     # Uses lxml query to find all, including in tables.
     start_found = start is None
-    for p in document._body._element.iterfind('.//'+qn('w:p')):
+    for p in document._body._element.findall('.//'+qn('w:p')):
         if start_found or p == start:
             start_found = True
             yield docx.text.paragraph.Paragraph(p, p.getparent())
