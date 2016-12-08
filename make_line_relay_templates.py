@@ -92,69 +92,6 @@ all_colors = set([
     OneBkr,
     TwoBkr])
 
-# Colors to remove for each standard.
-colors_to_remove = {
-    # DCBPriNonPilotSecOneBreaker
-    'PP115-230E1A3A': [
-        TwoBkr,
-        DCUBPriPOTTSec,
-        POTTPri,
-        SEL411LPriPOTTSec],
-
-    # POTTPriNonPilotSecOneBreaker
-    'PP115-230E1A3B': [
-        TwoBkr,
-        DCUBPriPOTTSec,
-        DCBPri,
-        SEL411LPriPOTTSec],
-
-    # 411LPriPOTTSecOneBreaker
-    # ChangePri421to411L
-    'PP115-230E1A3C': [
-        TwoBkr,
-        NonPilotSec,
-        DCUBPriPOTTSec,
-        DCBPri,
-        POTTPri,
-        SEL421Pri],
-
-    # DCBPriNonPilotSecTwoBreaker
-    'PP115-230E1B3A': [
-        OneBkr,
-        DCUBPriPOTTSec,
-        POTTPri,
-        SEL411LPriPOTTSec],
-
-    # POTTPriNonPilotSecTwoBreaker
-    'PP115-230E1B3B': [
-        OneBkr,
-        DCUBPriPOTTSec,
-        DCBPri,
-        SEL411LPriPOTTSec],
-
-    # 411LPriPOTTSecTwoBreaker
-    # ChangePri421to411L
-    'PP115-230E1B3C': [
-        OneBkr,
-        NonPilotSec,
-        DCUBPriPOTTSec,
-        DCBPri,
-        POTTPri,
-        SEL421Pri],
-
-    # DCUBPriPOTTSecTwoBreaker
-    'PP115-230E1B3A': [
-        OneBkr,
-        DCBPri,
-        POTTPri,
-        NonPilotSec,
-        SEL411LPriPOTTSec]
-}
-
-# Colors to keep for each standard. (Inverse of colors to remove.)
-all_colors = set([OneBkr, TwoBkr,
-                  DCBPri, POTTPri, SEL411LPriPOTTSec, DCUBPriPOTTSec,
-                  SEL421Pri, NonPilotSec])
 
 colors_to_keep = {
     'PP115-230E1A3A': set([SEL421Pri, DCBPri,  NonPilotSec, OneBkr]),
