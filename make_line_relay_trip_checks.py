@@ -19,8 +19,7 @@ is run from.
 
 from __future__ import print_function, unicode_literals
 
-from WordHelpers import find_replace, remove_highlighted, \
-    get_bookmark_par_element
+from WordHelpers import find_replace, remove_highlighted, clear_highlighting
 
 import re
 import sys
@@ -72,6 +71,7 @@ from docx.enum.text import WD_COLOR_INDEX
 #
 DCBPri = WD_COLOR_INDEX.TURQUOISE
 POTTPri = WD_COLOR_INDEX.BRIGHT_GREEN
+SEL411LPriPOTTSec = WD_COLOR_INDEX.DARK_YELLOW
 BusDiff = WD_COLOR_INDEX.GREEN
 OneBkr = WD_COLOR_INDEX.TEAL
 TwoBkr = WD_COLOR_INDEX.PINK
@@ -81,6 +81,7 @@ NonAutomated = WD_COLOR_INDEX.GRAY_25
 all_colors = set([
     DCBPri,
     POTTPri,
+    SEL411LPriPOTTSec,
     BusDiff,
     OneBkr,
     TwoBkr,
@@ -92,23 +93,52 @@ all_colors = set([
 colors_to_keep = {
     'PP115-230E1A3A': set([DCBPri,  OneBkr, BusDiff, Automated]),
     'PP115-230E1A3B': set([POTTPri, OneBkr, BusDiff, Automated]),
+    'PP115-230E1A3C': set([SEL411LPriPOTTSec, OneBkr, BusDiff, Automated]),
     'PP115-230E1B3A': set([DCBPri,  TwoBkr, Automated]),
     'PP115-230E1B3B': set([POTTPri, TwoBkr, Automated]),
+    'PP115-230E1B3C': set([SEL411LPriPOTTSec, TwoBkr, Automated]),
     'PP115-230E2A3A': set([DCBPri,  OneBkr, BusDiff, NonAutomated]),
     'PP115-230E2A3B': set([POTTPri, OneBkr, BusDiff, NonAutomated]),
+    'PP115-230E2A3C': set([SEL411LPriPOTTSec, OneBkr, BusDiff, NonAutomated]),
     'PP115-230E2B3A': set([DCBPri,  TwoBkr, NonAutomated]),
     'PP115-230E2B3B': set([POTTPri, TwoBkr, NonAutomated]),
+    'PP115-230E2B3C': set([SEL411LPriPOTTSec, TwoBkr, NonAutomated]),
+    'PP115-230ExAxx': set([DCBPri, POTTPri, SEL411LPriPOTTSec, OneBkr, BusDiff, Automated, NonAutomated]),
+    'PP115-230ExBxx': set([DCBPri, POTTPri, SEL411LPriPOTTSec, TwoBkr, Automated, NonAutomated]),
+    'TEST':           set()}
+
+highlights_to_keep = {
+    'PP115-230E1A3A': set([BusDiff]),
+    'PP115-230E1A3B': set([BusDiff]),
+    'PP115-230E1A3C': set([BusDiff]),
+    'PP115-230E1B3A': set([]),
+    'PP115-230E1B3B': set([]),
+    'PP115-230E1B3C': set([]),
+    'PP115-230E2A3A': set([BusDiff]),
+    'PP115-230E2A3B': set([BusDiff]),
+    'PP115-230E2A3C': set([BusDiff]),
+    'PP115-230E2B3A': set([]),
+    'PP115-230E2B3B': set([]),
+    'PP115-230E2B3C': set([]),
+    'PP115-230ExAxx': set([DCBPri, POTTPri, SEL411LPriPOTTSec, BusDiff, Automated, NonAutomated]),
+    'PP115-230ExBxx': set([DCBPri, POTTPri, SEL411LPriPOTTSec, Automated, NonAutomated]),
     'TEST':           set()}
 
 std_filenames = {
     'PP115-230E1A3A': 'DCB Single-Bkr Automated',
     'PP115-230E1A3B': 'POTT Single-Bkr Automated',
+    'PP115-230E1A3C': '411L-POTT Single-Bkr Automated',
     'PP115-230E1B3A': 'DCB Bkr-and-half or Ring Automated',
     'PP115-230E1B3B': 'POTT Bkr-and-half or Ring Automated',
+    'PP115-230E1B3C': '411L-POTT Bkr-and-half or Ring Automated',
     'PP115-230E2A3A': 'DCB Single-Bkr Non-Automated',
     'PP115-230E2A3B': 'POTT Single-Bkr Non-Automated',
+    'PP115-230E2A3C': '411L-POTT Single-Bkr Non-Automated',
     'PP115-230E2B3A': 'DCB Bkr-and-half or Ring Non-Automated',
     'PP115-230E2B3B': 'POTT Bkr-and-half or Ring Non-Automated',
+    'PP115-230E2B3C': '411L-POTT Bkr-and-half or Ring Non-Automated',
+    'PP115-230ExAxx': 'Single Breaker Trip Check Template',
+    'PP115-230ExBxx': 'Ring Bkr-and-a-half Trip Check Template',
     'TEST':           'Script Test'}
 
 # For testing only
@@ -116,15 +146,22 @@ std_filenames = {
 #std_filenames = {'TEST':  'Script Output'}
 
 def make_line_relay_trip_checks(document, std):
+    # Remove highlighted sections except colors to keep
     colors_to_remove = all_colors - colors_to_keep[std]
     for color in colors_to_remove:
         remove_highlighted(document, color)
+
+    # Remove remaining highlighting except highlighting to keep
+    highlights_to_remove = colors_to_keep[std] - highlights_to_keep[std]
+    for color in highlights_to_remove:
+        clear_highlighting(document, color)
+
     # Special find/replace for some automated/non-automated text
-    if Automated in colors_to_keep[std]:
+    if Automated in colors_to_keep[std] and NonAutomated not in colors_to_keep[std]:
         find_replace(document,
                      'HMI/annunciator/supervisory',
                      'HMI/supervisory')
-    elif NonAutomated in colors_to_keep[std]:
+    elif NonAutomated in colors_to_keep[std] and Automated not in colors_to_keep[std]:
         find_replace(document,
                      'HMI/supervisory',
                      'supervisory')
@@ -217,5 +254,6 @@ except (SystemExit, KeyboardInterrupt):
     raise
 except Exception, e:
     logger.error('Program error', exc_info=True)
+    raise
 finally:
     logger.info('DONE.')
