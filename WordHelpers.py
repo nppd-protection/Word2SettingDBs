@@ -8,6 +8,8 @@ from __future__ import print_function, unicode_literals
 
 import docx
 from docx.oxml.shared import qn
+# See https://python-docx.readthedocs.io/en/latest/api/enum/WdColorIndex.html
+from docx.enum.text import WD_COLOR_INDEX
 
 import operator
 import re
@@ -82,7 +84,8 @@ def delete_paragraph(paragraph):
     if isinstance(p.getparent(), docx.oxml.CT_Tc):
         if len(p.getparent().p_lst) < 2:
             return
-    p.getparent().remove(p)
+    if p.getparent() is not None:
+        p.getparent().remove(p)
     p._p = p._element = None
 
 
@@ -162,6 +165,7 @@ def find_replace(document, find_text, replace_text, *args, **kwargs):
 def remove_highlighted(document, remove_color, clean_logic_tables=False,
                        *args, **kwargs):
     for p in iter_all_paragraphs(document, *args, **kwargs):
+        tmp_text = p.text
         for r in p.runs:
             if r.font.highlight_color == remove_color:
                 r.clear()
@@ -194,6 +198,19 @@ def remove_highlighted(document, remove_color, clean_logic_tables=False,
             if p.font is not None and p.font.highlight_color == remove_color:
                 if p._element.getparent() is not None:
                     delete_paragraph(p)
+
+
+def clear_highlighting(document, remove_color, *args, **kwargs):
+    for p in iter_all_paragraphs(document, *args, **kwargs):
+        for r in p.runs:
+            if r.font.highlight_color == remove_color:
+                r.font.highlight_color = WD_COLOR_INDEX.AUTO
+
+        # There could be paragraphs with highlighting applied to
+        # paragraph.
+        # I had to patch python-docx a little to get this to work.
+        if p.font is not None and p.font.highlight_color == remove_color:
+            p.font.highlight_color = WD_COLOR_INDEX.AUTO
 
 
 # http://stackoverflow.com/questions/24965042/python-docx-insertion-point
