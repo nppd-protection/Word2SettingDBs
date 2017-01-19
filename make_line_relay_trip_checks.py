@@ -240,7 +240,7 @@ try:
             file_rev = ''
 
         save_file = os.path.join(os.path.dirname(documentParam),
-                                 std + ' ' + std_filenames[std] + \
+                                 'Trip Checks ' + std + ' ' + std_filenames[std] + \
                                  file_rev + '.docx')
         shutil.copyfile(documentParam, save_file)
         document = Document(save_file)
