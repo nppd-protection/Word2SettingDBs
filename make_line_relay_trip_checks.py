@@ -169,6 +169,29 @@ def make_line_relay_trip_checks(document, std):
                      'HMI/annunciator/supervisory',
                      'annunciator/supervisory')
 
+    # Special find/replace to change 421 contact terminal to 411L
+    if SEL411LPriPOTTSec in colors_to_keep[std] and \
+            DCBPri not in colors_to_keep[std] and \
+            POTTPri not in colors_to_keep[std]:
+        find_replace(document,
+                     '21P-LZZ relay OUT101 terminals A01 and A02',
+                     '21P-LZZ relay OUT201 terminals B01 and B02')
+        find_replace(document,
+                     '21P-LZZ relay OUT102 terminals A03 and A04',
+                     '21P-LZZ relay OUT202 terminals B03 and B04')
+        find_replace(document,
+                     '21P-LZZ relay OUT103 terminals A05 and A06',
+                     '21P-LZZ relay OUT203 terminals B05 and B06')
+        find_replace(document,
+                     '21P-LZZ relay OUT104 terminals A07 and A08',
+                     '21P-LZZ relay OUT204 terminals B07 and B08')
+        find_replace(document,
+                     'B05,B06 on 21P-LZZ',
+                     'C09,C10 on 21P-LZZ')
+        find_replace(document,
+                     'B07,B08 on 21P-LZZ',
+                     'C13,C14 on 21P-LZZ')
+
 # By default, log to the same directory the program is run from
 if os.path.exists(os.path.dirname(sys.argv[0])):
     logfile = os.path.join(os.path.dirname(sys.argv[0]),
