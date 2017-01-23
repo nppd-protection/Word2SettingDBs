@@ -94,6 +94,30 @@ def delete_run(run):
     r.getparent().remove(r)
     r._p = r._element = None
 
+def delete_run_and_cleanup(r, p, clean_logic_tables):
+    r.clear()
+    r_p = p
+    if len(r_p.text) == 0:
+        delete_paragraph(r_p)
+    # If table row is now rendered empty, delete the row
+    if isinstance(p._element.getparent(), docx.oxml.CT_Tc):
+        row = p._element.getparent().getparent()
+        row_pars = []
+        for tc in row.tc_lst:
+            for p2 in tc:
+                if isinstance(p2, docx.oxml.CT_P):
+                    row_pars.append(docx.text.paragraph.Paragraph(p2,
+                                                                  p2.getparent()))  # NOQA: To fix this long line will probably require some refactoring
+        row_text = ''.join([p2.text for p2 in row_pars])
+        if len(row_text) == 0:
+            delete_row(row)
+        # Special rule for Automation Logic & Protection Logic
+        # tables
+        elif clean_logic_tables and \
+             (re.match('[0-9]+\:(NOT 52AA1 *)?$', row_text) or
+              re.match('[0-9]+\:(NOT \(52AA1 OR 52AA2\) *)?$',
+                       row_text)):
+            delete_row(row)
 
 def delete_row(row):
     tbl = row.getparent()
@@ -164,32 +188,29 @@ def find_replace(document, find_text, replace_text, *args, **kwargs):
 
 def remove_highlighted(document, remove_color, clean_logic_tables=False,
                        *args, **kwargs):
+    """
+    Removes all runs highlighted with the specified color. Colors to remove are
+    from WD_COLOR_INDEX in docx.enum.text
+    See https://python-docx.readthedocs.io/en/latest/api/enum/WdColorIndex.html
+
+    A special check is made for runs with the text '{{' and '}}'. These will be
+    treated as delimiters of a run or runs highlighted with the color applied to
+    the special marker text. This allows up to two highlight colors to be
+    applied to text using the actual highlight color and the "extra"
+    highlight color added by the special tag. Special tags only affect text
+    within a paragraph; any changes end at the end of the paragraph.
+    """
     for p in iter_all_paragraphs(document, *args, **kwargs):
         tmp_text = p.text
+        extra_highlight = None
         for r in p.runs:
-            if r.font.highlight_color == remove_color:
-                r.clear()
-                r_p = p
-                if len(r_p.text) == 0:
-                    delete_paragraph(r_p)
-                # If table row is now rendered empty, delete the row
-                if isinstance(p._element.getparent(), docx.oxml.CT_Tc):
-                    row = p._element.getparent().getparent()
-                    row_pars = []
-                    for tc in row.tc_lst:
-                        for p2 in tc:
-                            if isinstance(p2, docx.oxml.CT_P):
-                                row_pars.append(docx.text.paragraph.Paragraph(p2, p2.getparent()))  # NOQA: To fix this long line will probably require some refactoring
-                    row_text = ''.join([p2.text for p2 in row_pars])
-                    if len(row_text) == 0:
-                        delete_row(row)
-                    # Special rule for Automation Logic & Protection Logic
-                    # tables
-                    elif clean_logic_tables and \
-                        (re.match('[0-9]+\:(NOT 52AA1 *)?$', row_text) or
-                         re.match('[0-9]+\:(NOT \(52AA1 OR 52AA2\) *)?$',
-                                  row_text)):
-                        delete_row(row)
+            if r.text == '{{':
+                extra_highlight = r.font.highlight_color
+            if r.text == '}}':
+                extra_highlight = None
+            if r.font.highlight_color is remove_color or \
+                    extra_highlight is remove_color:
+                delete_run_and_cleanup(r, p, clean_logic_tables)
 
         # There could be empty paragraphs with highlighting applied to
         # paragraph.
@@ -205,6 +226,8 @@ def clear_highlighting(document, remove_color, *args, **kwargs):
         for r in p.runs:
             if r.font.highlight_color == remove_color:
                 r.font.highlight_color = WD_COLOR_INDEX.AUTO
+                if r.text == '{{' or r.text == '}}':
+                    delete_run_and_cleanup(r, p, clean_logic_tables=False)
 
         # There could be paragraphs with highlighting applied to
         # paragraph.
