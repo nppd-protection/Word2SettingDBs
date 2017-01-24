@@ -43,7 +43,6 @@ def get_default_template():
                   r'Standards\Protection Design Standards'
     fn_pattern = 'Trip Checks Line Relay Master Rev*.docx'
     fn_list = glob.glob(os.path.join(default_dir, fn_pattern))
-    print(fn_list)
     if len(fn_list) > 0:
         return os.path.abspath(default_dir), os.path.basename(fn_list[-1])
     else:
