@@ -5,7 +5,7 @@ USAGE:
 make_line_relay_trip_checks.py ...
     <Trip Checks Line Relay Master.docx>
 
-<STrip Checks Line Relay Master.docx>:  MS Word docx document master template
+<Trip Checks Line Relay Master.docx>:  MS Word docx document master template
     for line relay trip checks.
 
 ABOUT:
@@ -22,15 +22,6 @@ from __future__ import print_function, unicode_literals
 from WordHelpers import find_replace, remove_highlighted, clear_highlighting
 
 import re
-import sys
-import os.path
-import os
-import codecs
-import shutil
-
-# Set up a logger so any errors can go to file to facilitate debugging
-import logging
-from logging.config import dictConfig
 
 #
 # The docx package documentation can be found at
@@ -136,10 +127,11 @@ std_filenames = {
     'PP115-230E2A3C': '411L-POTT Single-Bkr Non-Automated',
     'PP115-230E2B3A': 'DCB Bkr-and-half or Ring Non-Automated',
     'PP115-230E2B3B': 'POTT Bkr-and-half or Ring Non-Automated',
-    'PP115-230E2B3C': '411L-POTT Bkr-and-half or Ring Non-Automated',
-    'PP115-230ExAxx': 'Single Breaker Trip Check Template',
-    'PP115-230ExBxx': 'Ring Bkr-and-a-half Trip Check Template',
-    'TEST':           'Script Test'}
+    'PP115-230E2B3C': '411L-POTT Bkr-and-half or Ring Non-Automated'}
+# Additional template names that are defined but not used as this time
+#    'PP115-230ExAxx': 'Single Breaker Trip Check Template'
+#    'PP115-230ExBxx': 'Ring Bkr-and-a-half Trip Check Template'
+#    'TEST':           'Script Test'
 
 # For testing only
 #all_colors = set([OneBkr])
@@ -192,91 +184,104 @@ def make_line_relay_trip_checks(document, std):
                      'B07,B08 on 21P-LZZ',
                      'C13,C14 on 21P-LZZ')
 
-# By default, log to the same directory the program is run from
-if os.path.exists(os.path.dirname(sys.argv[0])):
-    logfile = os.path.join(os.path.dirname(sys.argv[0]),
-                           'make_line_relay_trip_checks.log')
-else:
-    logfile = 'make_line_relay_trip_checks.log'
+def main():
+    import os
+    import sys
+    import codecs
+    import shutil
 
-logging_config = {
-    'version': 1,
-    'formatters': {
-        'file': {'format':
-                 '%(asctime)s ' + os.environ['USERNAME'] +
-                 ' %(levelname)-8s %(message)s'},
-        'console': {'format':
-                    '%(levelname)-8s %(message)s'}
-        },
+    # Set up a logger so any errors can go to file to facilitate debugging
+    import logging
+    from logging.config import dictConfig
 
-    'handlers': {
-        'file': {'class': 'logging.FileHandler',
-                 'filename': logfile,
-                 'formatter': 'file',
-                 'level': 'INFO'},
-        'console': {'class': 'logging.StreamHandler',
-                    'formatter': 'console',
-                    'level': 'DEBUG'}
-        },
-    'loggers': {
-        'root': {'handlers': ['file', 'console'],
-                 'level': 'DEBUG'}
-        }
-}
+    # By default, log to the same directory the program is run from
+    if os.path.exists(os.path.dirname(sys.argv[0])):
+        logfile = os.path.join(os.path.dirname(sys.argv[0]),
+                               'make_line_relay_trip_checks.log')
+    else:
+        logfile = 'make_line_relay_trip_checks.log'
 
-dictConfig(logging_config)
+    logging_config = {
+        'version': 1,
+        'formatters': {
+            'file': {'format':
+                     '%(asctime)s ' + os.environ['USERNAME'] +
+                     ' %(levelname)-8s %(message)s'},
+            'console': {'format':
+                        '%(levelname)-8s %(message)s'}
+            },
 
-logger = logging.getLogger('root')
+        'handlers': {
+            'file': {'class': 'logging.FileHandler',
+                     'filename': logfile,
+                     'formatter': 'file',
+                     'level': 'INFO'},
+            'console': {'class': 'logging.StreamHandler',
+                        'formatter': 'console',
+                        'level': 'DEBUG'}
+            },
+        'loggers': {
+            'root': {'handlers': ['file', 'console'],
+                     'level': 'DEBUG'}
+            }
+    }
 
-try:
-    logger.info('Running %s.' % sys.argv[0])
-    logger.info('Logging to file %s.' % os.path.abspath(logfile))
+    dictConfig(logging_config)
 
-    debug = False
-    sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
-                                                       errors='replace')
+    logger = logging.getLogger('root')
 
-    if len(sys.argv) < 2:
-        logger.error("Not enough input parameters.  Please include one "
-                     "filename when calling this program.")
-        logger.error(__doc__)
-        raise SystemExit
-    elif len(sys.argv) > 2:
-        logger.error("Too many input parameters.  Please include one filename "
-                     "when calling this program.")
-        logger.error(__doc__)
-        raise SystemExit
+    try:
+        logger.info('Running %s.' % sys.argv[0])
+        logger.info('Logging to file %s.' % os.path.abspath(logfile))
 
-    documentParam = sys.argv[1]
+        debug = False
+        sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
+                                                           errors='replace')
 
-    doc_base = re.match('(.*)\.doc[xm]$', documentParam, flags=re.I).group(1)
+        if len(sys.argv) < 2:
+            logger.error("Not enough input parameters.  Please include one "
+                         "filename when calling this program.")
+            logger.error(__doc__)
+            raise SystemExit
+        elif len(sys.argv) > 2:
+            logger.error("Too many input parameters.  Please include one filename "
+                         "when calling this program.")
+            logger.error(__doc__)
+            raise SystemExit
 
-    logger.info('Input file: ' + documentParam)
-    logger.info('Base filename:  ' + doc_base)
+        documentParam = sys.argv[1]
 
-    for std in std_filenames.keys():
+        doc_base = re.match('(.*)\.doc[xm]$', documentParam, flags=re.I).group(1)
 
-        try:
-            file_rev = re.search(' Rev ?[0-9]+$', doc_base,
-                                 flags=re.I).group(0)
-        except AttributeError:
-            file_rev = ''
+        logger.info('Input file: ' + documentParam)
+        logger.info('Base filename:  ' + doc_base)
 
-        save_file = os.path.join(os.path.dirname(documentParam),
-                                 'Trip Checks ' + std + ' ' + std_filenames[std] + \
-                                 file_rev + '.docx')
-        shutil.copyfile(documentParam, save_file)
-        document = Document(save_file)
+        for std in std_filenames.keys():
 
-        make_line_relay_trip_checks(document, std)
+            try:
+                file_rev = re.search(' Rev ?[0-9]+$', doc_base,
+                                     flags=re.I).group(0)
+            except AttributeError:
+                file_rev = ''
 
-        logger.info('Saving output file: %s' % save_file)
-        document.save(save_file)
+            save_file = os.path.join(os.path.dirname(documentParam),
+                                     'Trip Checks ' + std + ' ' + std_filenames[std] + \
+                                     file_rev + '.docx')
+            shutil.copyfile(documentParam, save_file)
+            document = Document(save_file)
 
-except (SystemExit, KeyboardInterrupt):
-    raise
-except Exception, e:
-    logger.error('Program error', exc_info=True)
-    raise
-finally:
-    logger.info('DONE.')
+            make_line_relay_trip_checks(document, std)
+
+            logger.info('Saving output file: %s' % save_file)
+            document.save(save_file)
+
+    except (SystemExit, KeyboardInterrupt):
+        raise
+    except Exception, e:
+        logger.error('Program error', exc_info=True)
+        raise
+    finally:
+        logger.info('DONE.')
+
+if __name__ == '__main__':
+    main()
