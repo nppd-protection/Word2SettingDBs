@@ -90,10 +90,7 @@ class TkMakeChecksGUI(ttk.Frame):
 
         self.saveas_opt = options = {}
         options['filetypes'] = [('Word Document', '.docx')]
-        options['initialdir'] = r'T:\T&DElectronicFiling\ProtCntrl\\' \
-                                r'P&C Procedures\Design Standards\\' \
-                                r'Protection Design Standards\\' \
-                                r'Draft Standards\TC Templates'
+        options['initialdir'] = r'T:\T&DElectronicFiling\ProtCntrl\\'
         options['parent'] = root
 
         root.wm_title('Create trip check template from master')
@@ -135,10 +132,12 @@ class TkMakeChecksGUI(ttk.Frame):
         logger = self.logger
         logger.info('Selecting input file...')
         initialdir, initialfile = os.path.split(self.documentParam.get())
-        self.documentParam.set(filedialog.askopenfilename(
+        open_file = filedialog.askopenfilename(
             initialdir=initialdir, initialfile=initialfile,
-            **self.template_opt))
-        logger.info('Selected input file: ' + self.documentParam.get())
+            **self.template_opt)
+        if open_file:
+            self.documentParam.set()
+            logger.info('Selected input file: ' + self.documentParam.get())
 
     def doit(self):
         logger = self.logger
