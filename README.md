@@ -29,11 +29,15 @@ Word documents based on highlighting in the document. Each resulting document
 will include all unhighlighted text as well as text highlighted in ONE color.
 
 make_line_relay_templates.py generates the various standard Word setting
-calculation templates from the master template.
+calculation templates from the master template. It can also be used as a module
+for generating the templates in other programs.
+
+make_line_relay_gui.py is a GUI program that generates a single standard
+Word calculation document based on the selected standard.
 
 make_line_relay_trip_checks.py generates the various standard Word trip check
 templates from the master template. It can also be used as a module for
 generating the templates in other programs.
 
 make_trip_checks_gui.py is a GUI program that generates a single standard
-Word trip check template based on the selected standard.
+Word trip check document based on the selected standard.
