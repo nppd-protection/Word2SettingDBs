@@ -19,15 +19,9 @@ is run from.
 
 from __future__ import print_function, unicode_literals
 
-from WordHelpers import find_replace, remove_highlighted, \
+from WordHelpers import find_replace, remove_highlighted, clear_highlighting, \
     get_bookmark_par_element
 
-import re
-import sys
-import os.path
-import os
-import codecs
-import shutil
 
 # Set up a logger so any errors can go to file to facilitate debugging
 import logging
@@ -100,25 +94,16 @@ colors_to_keep = {
     'PP115-230E1B3A': set([SEL421Pri, DCBPri,  NonPilotSec, TwoBkr]),
     'PP115-230E1B3B': set([SEL421Pri, POTTPri, NonPilotSec, TwoBkr]),
     'PP115-230E1B3C': set([SEL411LPriPOTTSec,               TwoBkr]),
-    'PP345J0X5A':     set([SEL421Pri, DCBPri,  NonPilotSec, TwoBkr]),
-    'TEST':           set()}
+    'PP345J0X5A':     set([SEL421Pri, DCUBPriPOTTSec, TwoBkr])}
 
 std_filenames = {
-    'PP115-230E1A3A': 'Settings PP115-230E1A3A RFL9785-DCB 21P-02 11S-02 '
-                      'SEL-421-4',
-    'PP115-230E1A3B': 'Settings PP115-230E1A3B MB-POTT 21P-02 11S-02 '
-                      'SEL-421-4',
-    'PP115-230E1A3C': 'Settings PP115-230E1A3C 87P-02 11S-02 SEL-411L-421-4',
-    'PP115-230E1B3A': 'Settings PP115-230E1B3A RFL9785-DCB 21P-L1098 21S-L1098'
-                      ' SEL-421-4',
-    'PP115-230E1B3B': 'Settings PP115-230E1B3B MB-POTT 21P-L1369 21S-L1369 '
-                      'SEL-421-4',
-    'PP115-230E1B3C': 'Settings PP115-230E1B3C 87P-L91A 21S-L91A '
-                      'SEL-411L-421-4',
-    'PP345J0X5A':     'Settings PP345J0X5A 345kv line relays 21P-21S '
-                      'SEL-421-5',
-    'TEST':           'Settings Dual SEL-421 Line Relay master Standard '
-                      '(macro test)'}
+    'PP115-230E1A3A': 'DCB 1Bkr 21P-0X 11S-0X SEL-421-4',
+    'PP115-230E1A3B': 'POTT 1Bkr 21P-0X 11S-0X SEL-421-4',
+    'PP115-230E1A3C': '87L 1Bkr 87P-LZZ 11S-0X SEL-411L-421-4',
+    'PP115-230E1B3A': 'DCB 2Bkr 21P-LZZ 21S-LZZ SEL-421-4',
+    'PP115-230E1B3B': 'POTT 2Bkr 21P-LZZ 21S-LZZ SEL-421-4',
+    'PP115-230E1B3C': '87L 2Bkr 87P-LZZ 21S-LZZ SEL-411L-421-4',
+    'PP345J0X5A':     '345kV DCUB-POTT 21P-LZZ 21S-LZZ SEL-421-5'}
 
 
 def change_pri_421_to_411L(document):
@@ -141,94 +126,111 @@ def make_line_relay_templates(document, std):
     colors_to_remove = all_colors - colors_to_keep[std]
     for color in colors_to_remove:
         remove_highlighted(document, color, clean_logic_tables=True)
+
+    # Remove remaining highlighting
+    highlights_to_remove = colors_to_keep[std]
+    for color in highlights_to_remove:
+        clear_highlighting(document, color)
+
     if SEL411LPriPOTTSec in colors_to_keep[std]:
         change_pri_421_to_411L(document)
 
-# By default, log to the same directory the program is run from
-if os.path.exists(os.path.dirname(sys.argv[0])):
-    logfile = os.path.join(os.path.dirname(sys.argv[0]),
-                           'make_line_relay_templates.log')
-else:
-    logfile = 'SplitByHighlighting.log'
+def main():
+    import re
+    import sys
+    import os.path
+    import os
+    import codecs
+    import shutil
 
-logging_config = {
-    'version': 1,
-    'formatters': {
-        'file': {'format':
-                 '%(asctime)s ' + os.environ['USERNAME'] +
-                 ' %(levelname)-8s %(message)s'},
-        'console': {'format':
-                    '%(levelname)-8s %(message)s'}
-        },
+    # By default, log to the same directory the program is run from
+    if os.path.exists(os.path.dirname(sys.argv[0])):
+        logfile = os.path.join(os.path.dirname(sys.argv[0]),
+                               'make_line_relay_templates.log')
+    else:
+        logfile = 'SplitByHighlighting.log'
 
-    'handlers': {
-        'file': {'class': 'logging.FileHandler',
-                 'filename': logfile,
-                 'formatter': 'file',
-                 'level': 'INFO'},
-        'console': {'class': 'logging.StreamHandler',
-                    'formatter': 'console',
-                    'level': 'DEBUG'}
-        },
-    'loggers': {
-        'root': {'handlers': ['file', 'console'],
-                 'level': 'DEBUG'}
-        }
-}
+    logging_config = {
+        'version': 1,
+        'formatters': {
+            'file': {'format':
+                     '%(asctime)s ' + os.environ['USERNAME'] +
+                     ' %(levelname)-8s %(message)s'},
+            'console': {'format':
+                        '%(levelname)-8s %(message)s'}
+            },
 
-dictConfig(logging_config)
+        'handlers': {
+            'file': {'class': 'logging.FileHandler',
+                     'filename': logfile,
+                     'formatter': 'file',
+                     'level': 'INFO'},
+            'console': {'class': 'logging.StreamHandler',
+                        'formatter': 'console',
+                        'level': 'DEBUG'}
+            },
+        'loggers': {
+            'root': {'handlers': ['file', 'console'],
+                     'level': 'DEBUG'}
+            }
+    }
 
-logger = logging.getLogger('root')
+    dictConfig(logging_config)
 
-try:
-    logger.info('Running %s.' % sys.argv[0])
-    logger.info('Logging to file %s.' % os.path.abspath(logfile))
+    logger = logging.getLogger('root')
 
-    debug = False
-    sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
-                                                       errors='replace')
+    try:
+        logger.info('Running %s.' % sys.argv[0])
+        logger.info('Logging to file %s.' % os.path.abspath(logfile))
 
-    if len(sys.argv) < 2:
-        logger.error("Not enough input parameters.  Please include one "
-                     "filename when calling this program.")
-        logger.error(__doc__)
-        raise SystemExit
-    elif len(sys.argv) > 2:
-        logger.error("Too many input parameters.  Please include one filename "
-                     "when calling this program.")
-        logger.error(__doc__)
-        raise SystemExit
+        debug = False
+        sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
+                                                           errors='replace')
 
-    documentParam = sys.argv[1]
+        if len(sys.argv) < 2:
+            logger.error("Not enough input parameters.  Please include one "
+                         "filename when calling this program.")
+            logger.error(__doc__)
+            raise SystemExit
+        elif len(sys.argv) > 2:
+            logger.error("Too many input parameters.  Please include one filename "
+                         "when calling this program.")
+            logger.error(__doc__)
+            raise SystemExit
 
-    doc_base = re.match('(.*)\.doc[xm]$', documentParam, flags=re.I).group(1)
+        documentParam = sys.argv[1]
 
-    logger.info('Input file: ' + documentParam)
-    logger.info('Base filename:  ' + doc_base)
+        doc_base = re.match('(.*)\.doc[xm]$', documentParam, flags=re.I).group(1)
 
-    # For testing, hard-code standard to use
-    std = 'PP115-230E1A3A'
-    for std in std_filenames.keys():
+        logger.info('Input file: ' + documentParam)
+        logger.info('Base filename:  ' + doc_base)
 
-        try:
-            file_rev = re.search(' Rev ?[0-9]+$', doc_base,
-                                 flags=re.I).group(0)
-        except AttributeError:
-            file_rev = ''
+        # For testing, hard-code standard to use
+        std = 'PP115-230E1A3A'
+        for std in std_filenames.keys():
 
-        save_file = os.path.join(os.path.dirname(documentParam),
-                                 std_filenames[std] + file_rev + '.docx')
-        shutil.copyfile(documentParam, save_file)
-        document = Document(save_file)
+            try:
+                file_rev = re.search(' Rev ?[0-9]+$', doc_base,
+                                     flags=re.I).group(0)
+            except AttributeError:
+                file_rev = ''
 
-        make_line_relay_templates(document, std)
+            save_file = os.path.join(os.path.dirname(documentParam),
+                                     std_filenames[std] + file_rev + '.docx')
+            shutil.copyfile(documentParam, save_file)
+            document = Document(save_file)
 
-        logger.info('Saving output file: %s' % save_file)
-        document.save(save_file)
+            make_line_relay_templates(document, std)
 
-except (SystemExit, KeyboardInterrupt):
-    raise
-except Exception, e:
-    logger.error('Program error', exc_info=True)
-finally:
-    logger.info('DONE.')
+            logger.info('Saving output file: %s' % save_file)
+            document.save(save_file)
+
+    except (SystemExit, KeyboardInterrupt):
+        raise
+    except Exception, e:
+        logger.error('Program error', exc_info=True)
+    finally:
+        logger.info('DONE.')
+
+if __name__ == '__main__':
+    main()
