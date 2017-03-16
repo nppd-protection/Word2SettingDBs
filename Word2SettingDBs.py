@@ -214,7 +214,7 @@ try:
     reSpecial = re.compile('[^-_ A-Za-z0-9]+')
 
     def portX(t):
-        return "PORT "+re.match("PORT ([F,1-4]).*", t).group(1)
+        return "PORT "+re.match("PORT ([F,1-5]).*", t).group(1)
 
     reGroups = [("ALIAS", re.compile("ALIAS", flags=re.I), ),
                 ("GLOBAL", re.compile("GLOBAL", flags=re.I), ),
@@ -233,7 +233,7 @@ try:
                 ("REPORT",  re.compile("REPORT", flags=re.I)),
                 ("TEXT",  re.compile("TEXT", flags=re.I)),
                 # portX must be last.
-                (portX,  re.compile("PORT ([F,1-4])", flags=re.I))]
+                (portX,  re.compile("PORT ([F,1-5])", flags=re.I))]
 
     sel4XX_names = {"ALIAS": "T1",
                     "GLOBAL": "G1",
@@ -249,6 +249,7 @@ try:
                     "PORT 1": "P1",
                     "PORT 2": "P2",
                     "PORT 3": "P3",
+                    "PORT 5": "P5",
                     "PORT F": "PF"}
 
     sel4XX_AspenDBnames = {"GLOBAL": "1GLOB",
@@ -263,6 +264,7 @@ try:
                            "PORT 1": "9PRT1",
                            "PORT 2": "9PRT2",
                            "PORT 3": "9PRT3",
+                           "PORT 5": "9PRT5",
                            "PORT F": "9PRTF"}
 
     sel487B_AspenDBnames = {"ALIAS": "1ALIAS",
@@ -277,6 +279,7 @@ try:
                             "PORT 1": "9PRT1",
                             "PORT 2": "9PRT2",
                             "PORT 3": "9PRT3",
+                            "PORT 5": "9PRT5",
                             "PORT F": "9PRTF"}
     sel3XX_names = {"GLOBAL": "G",
                     "GROUP 1": "1",
@@ -289,6 +292,7 @@ try:
                     "PORT 2": "P2",
                     "PORT 3": "P3",
                     "PORT 4": "P4",
+                    "PORT 5": "P5",
                     "PORT F": "PF"}
 
     sel3XX_AspenDBnames = {"GLOBAL": "0",
@@ -302,6 +306,7 @@ try:
                            "PORT 2": "0",
                            "PORT 3": "0",
                            "PORT 4": "0",
+                           "PORT 5": "0",
                            "PORT F": "0"}
 
     reSetting = re.compile('([^=]+)\s*=\s*(.*)')
