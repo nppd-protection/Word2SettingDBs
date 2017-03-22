@@ -237,9 +237,10 @@ try:
 
     sel4XX_names = {"ALIAS": "T1",
                     "GLOBAL": "G1",
-                    "PORT 87": "P87",
+                    "PORT 87": "P87", # SEL-411L
                     "BREAKER MONITOR": "SM",
-                    "ZONE 1": "Z1",
+                    "MONITOR": "M1",  # SEL-487V
+                    "ZONE 1": "Z1",   # SEL-487B
                     "GROUP 1": "S1",
                     "PROTECTION LOGIC": "L1",
                     "AUTOMATION LOGIC": "A1",
@@ -255,6 +256,7 @@ try:
     sel4XX_AspenDBnames = {"GLOBAL": "1GLOB",
                            "PORT 87": "1PORT87",
                            "BREAKER MONITOR": "2BRKR",
+                           "MONITOR": "2MON",
                            "GROUP 1": "3GRP",
                            "PROTECTION LOGIC": "4PROT",
                            "AUTOMATION LOGIC": "5AUTO",
@@ -295,19 +297,19 @@ try:
                     "PORT 5": "P5",
                     "PORT F": "PF"}
 
-    sel3XX_AspenDBnames = {"GLOBAL": "0",
-                           "GROUP 1": "0",
-                           "GROUP 1 LOGIC": "0",
-                           "REPORT": "0",
-                           "CHANNEL X": "0",
-                           "CHANNEL Y": "0",
-                           "TEXT": "0",
-                           "PORT 1": "0",
-                           "PORT 2": "0",
-                           "PORT 3": "0",
-                           "PORT 4": "0",
-                           "PORT 5": "0",
-                           "PORT F": "0"}
+    sel3XX_AspenDBnames = {"GLOBAL": "1GLOB",
+                           "GROUP 1": "2GRP",
+                           "GROUP 1 LOGIC": "3LOGIC",
+                           "REPORT": "4RPT",
+                           "CHANNEL X": "6CHX",
+                           "CHANNEL Y": "6CHY",
+                           "TEXT": "5TEXT",
+                           "PORT 1": "9PRT1",
+                           "PORT 2": "9PRT2",
+                           "PORT 3": "9PRT3",
+                           "PORT 4": "9PRT4",
+                           "PORT 5": "9PRT5",
+                           "PORT F": "9PRTF"}
 
     reSetting = re.compile('([^=]+)\s*=\s*(.*)')
     document = Document(documentParam)
@@ -636,16 +638,20 @@ try:
     # Loop through settings extracted from Word file and try to find a match in
     # the Aspen settings
     logger.info('Matching settings from Word document to Aspen template....')
+    grp_missing = set()
     for grp, settinglist in settings.items():
         logger.debug('Processing group '+grp)
-        # For now skip 3XX port settings since there isn't an easy way to match
-        # up the ports correctly
-        if rly_family == '3XX' and grp in ('PORT 1', 'PORT 2', 'PORT 3',
-                                           'PORT F', 'PORT 4'):
-            continue
         for setting, value in settinglist:
             logger.debug('Looking for setting ' + setting)
-            for aspenSetting in aspenSettings[aspen_names[grp]]:
+            aspen_grp = aspen_names[grp]
+            if aspen_grp not in aspenSettings:
+                # Skip in loop if group not implemented in Aspen template yet
+                if grp not in grp_missing:
+                    logger.warning('Group missing from Aspen template: ' + \
+                                   grp + ' (' + aspen_grp + ')')
+                    grp_missing.add(grp)
+                continue
+            for aspenSetting in aspenSettings[aspen_grp]:
                 # Aspen DB exports setting names all caps, so comparison has to
                 # be case insensitive.
                 if aspenSetting['setting'].upper().strip() == setting.upper() \
