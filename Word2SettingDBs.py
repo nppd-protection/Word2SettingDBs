@@ -46,20 +46,7 @@ The Aspen Database Text File is not written from scratch, rather, an Aspen Text
 File must be exported from the Aspen Database first, then this program reads in
 that file, changes the setting values that it found in the docx setting
 calculation document, then writes out a new Aspen Database text file for
-subsequent import into Aspen Database.  As of 7/14/2014, Aspen Database has a
-number of bugs that can affect the importing of settings.  Sometimes the Aspen
-Database program will report an error message about not being able to connect
-to the database.  This error can be resolved by closing Aspen Database and then
-re-opening it.  The Aspen Database setting sheet comparison feature compares
-only based on common group and setting names and does not handle settings with
-the same group and name well.  The comparison may show settings as changed or
-different between two setting sheets even though they are in fact the same. An
-updated build of Aspen Database resolves these issues but as of 1/23/2016 has
-not been officially released. See Paul if you would like to run the development
-release.
-
-NOTE:  Due to issues with duplicate setting names, port settings for SEL-3Xx
-relays are currently NOT exported to Aspen database.
+subsequent import into Aspen Database.
 
 Progress information and errors are logged to the same directory as the program
 is run from.
