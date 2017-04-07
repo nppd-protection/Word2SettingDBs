@@ -201,7 +201,7 @@ try:
     reSpecial = re.compile('[^-_ A-Za-z0-9]+')
 
     def portX(t):
-        return "PORT "+re.match("PORT ([F,1-5]).*", t).group(1)
+        return "PORT "+re.match("PORT ([F,1-5]).*", t, flags=re.I).group(1)
 
     reGroups = [("ALIAS", re.compile("ALIAS", flags=re.I), ),
                 ("GLOBAL", re.compile("GLOBAL", flags=re.I), ),
