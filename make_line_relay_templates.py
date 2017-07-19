@@ -184,8 +184,11 @@ def main():
         logger.info('Logging to file %s.' % os.path.abspath(logfile))
 
         debug = False
-        sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
-                                                           errors='replace')
+        # Fix issue with output encoding of special characters on Windows terminal
+        # for Python 2.7 only.
+        if sys.version_info[0] < 3:
+            sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
+                                                               errors='replace')
 
         if len(sys.argv) < 2:
             logger.error("Not enough input parameters.  Please include one "
@@ -227,7 +230,7 @@ def main():
 
     except (SystemExit, KeyboardInterrupt):
         raise
-    except Exception, e:
+    except Exception as e:
         logger.error('Program error', exc_info=True)
     finally:
         logger.info('DONE.')

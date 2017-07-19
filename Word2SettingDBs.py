@@ -123,8 +123,11 @@ try:
     logger.info('Logging to file %s.' % os.path.abspath(logfile))
 
     debug = False
-    sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
-                                                       errors='replace')
+    # Fix issue with output encoding of special characters on Windows terminal
+    # for Python 2.7 only.
+    if sys.version_info[0] < 3:
+        sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout,
+                                                           errors='replace')
 
     if len(sys.argv) < 3:
         logger.error("Not enough input parameters.  Please include two "
@@ -827,13 +830,13 @@ try:
 
 except (SystemExit, KeyboardInterrupt):
     raise
-except Exception, e:
+except Exception as e:
     logger.error('Program error', exc_info=True)
 finally:
     # Code copied from
     # http://stackoverflow.com/questions/11876618/python-press-any-key-to-exit
     # This uses a Windows-specific library (msvcrt).
     logger.info('DONE.')
-    print('Press any key to exit...')
+    print(u'Press any key to exit...')
     # Assign to a variable just to suppress output. Blocks until key press.
     junk = msvcrt.getch()
