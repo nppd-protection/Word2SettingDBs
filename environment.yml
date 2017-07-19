@@ -1,0 +1,19 @@
+name: Word2SettingDBs
+channels:
+- anaconda-fusion
+- defaults
+dependencies:
+- git=2.11.1=0
+- pip=9.0.1=py36_1
+- python=3.6.1=2
+- setuptools=27.2.0=py36_1
+- vs2015_runtime=14.0.25420=0
+- wheel=0.29.0=py36_0
+- pip:
+  - future==0.16.0
+  - lxml==3.8.0
+  - pyinstaller==3.2.1
+  - pypiwin32==220
+  - python-docx (c:\users\pdbrown\desktop\word2settingdbs\src\python-docx)==0.8.5
+prefix: C:\Users\pdbrown\AppData\Local\Continuum\Anaconda3\envs\Word2SettingDBs
+
