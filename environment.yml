@@ -14,6 +14,4 @@ dependencies:
   - lxml==3.8.0
   - pyinstaller==3.2.1
   - pypiwin32==220
-  - python-docx (c:\users\pdbrown\desktop\word2settingdbs\src\python-docx)==0.8.5
-prefix: C:\Users\pdbrown\AppData\Local\Continuum\Anaconda3\envs\Word2SettingDBs
-
+  - python-docx==0.8.5
