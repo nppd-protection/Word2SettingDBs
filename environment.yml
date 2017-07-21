@@ -1,0 +1,20 @@
+name: Word2SettingDBs
+channels:
+- anaconda-fusion
+- defaults
+dependencies:
+- git=2.11.1=0
+- pip=9.0.1=py35_1
+- python=3.5.3=3
+- setuptools=27.2.0=py35_1
+- vs2015_runtime=14.0.25420=0
+- wheel=0.29.0=py35_0
+- pip:
+  - future==0.16.0
+  - lxml==3.8.0
+  - pyinstaller==3.2.1
+  - pypiwin32==219acti
+  # Once this branch is merged to the main python-docx branch, then the
+  # requirement can be changed to python-docx==____ (whatever the version is).
+  - git+https://github.com/pdb5627/python-docx@feature-paragraph-font
+
