@@ -3,20 +3,20 @@ GUI interface to the make_line_relay_trip_checks program to generate
 application-specific templates on the fly rather than pre-generated.
 """
 
-try:
-    import tkinter as tk
-except ImportError:
+import sys
+if sys.version_info[0] < 3:
     import Tkinter as tk
-import ttk
-import Tkconstants
-try:
-    import tkinter.filedialog as filedialog
-except:
+    import ttk
+    import Tkconstants
     import tkFileDialog as filedialog
-try:
-    import tkinter.messagebox as messagebox
-except:
     import tkMessageBox as messagebox
+else:
+    import tkinter as tk
+    import tkinter.ttk as ttk
+    import tkinter.constants as Tkconstants
+    import tkinter.filedialog as filedialog
+    import tkinter.messagebox as messagebox
+
 # Set up a logger so any errors can go to file to facilitate debugging
 import logging
 from logging.config import dictConfig
