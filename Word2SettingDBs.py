@@ -396,8 +396,8 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 setList = ['PROTSEL%d' % n for n in range(1, 251)]
-                valList = filter(lambda s: len(s) > 0,
-                                 [''.join([''.join([r.text for r in filter(setting_run, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells])  # NOQA: Needs refactoring
+                valList = list(filter(lambda s: len(s) > 0,
+                                 [''.join([''.join([r.text for r in filter(setting_run, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells]))  # NOQA: Needs refactoring
                 valList.extend(['']*(250 - len(valList)))
                 settings[grp].extend(zip(setList, valList))
             else:
@@ -417,7 +417,7 @@ try:
                 if grp not in settings:
                     settings[grp] = []
                 setList = ['AUTO_%d' % n for n in range(1, 101)]
-                valList = filter(lambda s: len(s) > 0, [''.join([''.join([r.text for r in filter(setting_run, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells])  # NOQA: Needs refactoring
+                valList = list(filter(lambda s: len(s) > 0, [''.join([''.join([r.text for r in filter(setting_run, p.runs)]).strip() for p in c.paragraphs]) for c in tLogic.columns[1].cells]))  # NOQA: Needs refactoring
                 valList.extend(['']*(100 - len(valList)))
                 settings[grp].extend(zip(setList, valList))
             else:
