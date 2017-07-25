@@ -505,29 +505,6 @@ try:
             if 'DP_ELE%d' % n not in setList:
                 settings[grp].append(('DP_ELE%d' % n, ''))
 
-    # SEL-487B display point settings have to be handled before Aspen file is
-    # written since for some reason the template was set up according to
-    # internal structure of display points (except not handling analogs).
-    if rly_family == '4XX' and rly_type == 'SEL-487B' and grp in settings:
-        DPSetList = ["DP_ELE", "DP_NAM", "DP_SET", "DP_CLR", "DP_SIZE"]
-        DPAnaSetList = ["DP_ELE", "DP_NAM", "DP_SET", "DP_SCA", "DP_CLR",
-                        "DP_SIZE"]
-        DPSettingList, settings[grp] = partition(lambda s: re.match('DP_ELE', s[0]), settings[grp])
-        for DPSetting in DPSettingList:
-            n = re.match('DP_ELE([0-9]*)', DPSetting[0]).group(1)
-            valList = stripall(stripall(DPSetting[1].split(',')), '"')
-            # Identify analog display points by having more settings than usual
-            # Other approaches could be used, but this is simple.
-            if len(valList) > len(DPSetList):
-                setList = [s + n for s in DPAnaSetList]
-            else:
-                setList = [s + n for s in DPSetList]
-            # If not enough settings are provided, extend with blanks
-            if len(valList) < len(setList):
-                valList.extend(['']*(len(setList) - len(valList)))
-
-            logger.debug(valList)
-            settings[grp].extend(zip(setList, valList))
 
     ###########################
     # Write ASPEN file
@@ -693,9 +670,8 @@ try:
 
     # DP_ELE (up to 96 settings)
     grp = 'FRONT PANEL'
-    # SEL-487B display point settings have to be handled already due to how
-    # Aspen template is set up.
-    if rly_family == '4XX' and rly_type != 'SEL-487B' and grp in settings:
+
+    if rly_family == '4XX' and rly_type and grp in settings:
         DPSetList = ["DP_ELE", "DP_NAM", "DP_SET", "DP_CLR", "DP_SIZE"]
         DPAnaSetList = ["DP_ELE", "DP_NAM", "DP_SET", "DP_SCA", "DP_CLR", "DP_SIZE"]
         DPSettingList, settings[grp] = partition(lambda s: re.match('DP_ELE', s[0]), settings[grp])
